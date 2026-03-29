@@ -69,6 +69,7 @@ export async function GET(req: Request) {
               .from(bucket)
               .download(fileKey);
             if (error || !data) {
+              console.log('[Backup]', { timestamp: new Date().toISOString(), bucket, file: fileKey, status: 'failed' });
               errors.push(
                 `Failed to download ${bucket}/${fileKey}: ${error?.message || "Unknown error"}`,
               );
@@ -88,11 +89,15 @@ export async function GET(req: Request) {
               }),
             );
 
+            console.log('[Backup]', { timestamp: new Date().toISOString(), bucket, file: fileKey, status: 'copied' });
             totalCopied++;
           } catch (e: any) {
+            console.log('[Backup]', { timestamp: new Date().toISOString(), bucket, file: fileKey, status: 'failed' });
             errors.push(`Failed to backup ${bucket}/${fileKey}: ${e.message}`);
             totalFailed++;
           }
+        } else {
+          console.log('[Backup]', { timestamp: new Date().toISOString(), bucket, file: fileKey, status: 'skipped' });
         }
       }
     }
